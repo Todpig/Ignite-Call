@@ -1,7 +1,7 @@
 import PrismaAdpter from "@/lib/auth/prisma-adpter";
 import { NextApiRequest, NextApiResponse } from "next";
 import NextAuth, { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import GoogleProvider, { GoogleProfile } from "next-auth/providers/google";
 
 export function buildNextAuthOptions(
   req: NextApiRequest,
@@ -17,11 +17,20 @@ export function buildNextAuthOptions(
         authorization: {
           params: {
             scope:
-              "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar",
+              "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar",
           },
         },
+        // idToken: true,
+        profile(profile: GoogleProfile) {
+          return {
+            id: profile.sub,
+            name: profile.name,
+            username: "",
+            email: profile.email,
+            avatar_url: profile.picture,
+          };
+        },
       }),
-      // ...add more providers here
     ],
     callbacks: {
       async signIn({ account }) {
@@ -32,10 +41,16 @@ export function buildNextAuthOptions(
         }
         return true;
       },
+      async session({ session, user }) {
+        return {
+          ...session,
+          user,
+        };
+      },
     },
   };
 }
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
-  return await NextAuth(req, res, buildNextAuthOptions(req, res));
+  return NextAuth(req, res, buildNextAuthOptions(req, res));
 }

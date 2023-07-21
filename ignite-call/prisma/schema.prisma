@@ -5,15 +5,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User{
-  id            String @id @default(uuid())
-  username      String @unique
+model User {
+  id            String             @id @default(uuid())
+  username      String             @unique
   name          String
-  created_at    DateTime @default(now())
-  email         String?   @unique
+  created_at    DateTime           @default(now())
+  email         String?            @unique
   avatar_url    String?
   accounts      Account[]
   sessions      Session[]
+  timeIntervals UserTimeInterval[]
 
   @@map("users")
 }
@@ -24,23 +25,23 @@ datasource db {
 }
 
 model Account {
-id String @id @default(cuid())
-user_id String @map("user_id")
-type String
-provider String
-provider_account_id String @map("provider_account_id")
-refresh_token String?
-access_token String?
-expires_at Int?
-token_type String?
-scope String?
-id_token String?
-session_state String?
+  id                  String  @id @default(cuid())
+  user_id             String  @map("user_id")
+  type                String
+  provider            String
+  provider_account_id String  @map("provider_account_id")
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
 
-user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-@@unique([provider, provider_account_id])
-@@map("accounts")
+  @@unique([provider, provider_account_id])
+  @@map("accounts")
 }
 
 model Session {
@@ -49,5 +50,17 @@ model Session {
   user_id       String
   expires       DateTime
   user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
   @@map("sessions")
+}
+
+model UserTimeInterval {
+  id                    String @id @default(uuid())
+  week_day              Int
+  time_start_in_minutes Int
+  time_end_in_minutes   Int
+  user                  User   @relation(fields: [user_id], references: [id])
+  user_id               String
+
+  @@map("user_time_intervals")
 }
