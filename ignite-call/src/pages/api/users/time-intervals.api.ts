@@ -21,6 +21,7 @@ export default async function handle(
   if (req.method !== "POST") {
     return res.status(405).end();
   }
+
   const session = await getServerSession(
     req,
     res,
